@@ -36,6 +36,7 @@
 
 #include "wx/dynlib.h"
 #include "wx/msw/missing.h"
+#include "wx/msw/private/darkmode.h"
 
 #include <memory>
 
@@ -228,6 +229,14 @@ bool wxNonOwnedWindow::IsThisEnabled() const
                   : m_isEnabled;
 }
 
+void wxNonOwnedWindow::MSWSetDarkOrLightMode(SetMode setmode)
+{
+    wxNonOwnedWindowBase::MSWSetDarkOrLightMode(setmode);
+
+    // Update non-client area
+    wxMSWDarkMode::ConfigureTLW(GetHwnd());
+}
+
 WXLRESULT wxNonOwnedWindow::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
     WXLRESULT rc = 0;
@@ -309,7 +318,7 @@ bool wxNonOwnedWindow::HandleDPIChange(const wxSize& newDPI, const wxRect& newRe
         wxRect actualNewRect = newRect;
         if ( wxSizer* sizer = GetSizer() )
         {
-            const wxSize minSize = ClientToWindowSize(sizer->GetMinSize());
+            const wxSize minSize = sizer->ComputeFittingWindowSize(this);
             wxSize diff = minSize - newRect.GetSize();
 
             // We don't want to shrink the window as if the user had increased
