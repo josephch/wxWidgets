@@ -1538,7 +1538,15 @@ wxTreeItemId wxGenericTreeCtrl::GetNextVisible(const wxTreeItemId& item) const
     wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
     wxASSERT_MSG( IsVisible(item), wxT("this item itself should be visible") );
 
-    return DoGetNext(item, Next_Visible);
+    wxTreeItemId itemid = DoGetNext(item, Next_Visible);
+    while (itemid.IsOk())
+    {
+        if (IsVisible(itemid))
+            return itemid;
+        itemid = DoGetNext(itemid, Next_Visible);
+    };
+
+    return wxTreeItemId();
 }
 
 wxTreeItemId wxGenericTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
